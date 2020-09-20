@@ -22,26 +22,17 @@ namespace AutomaticSirenCutout
                 {
                     rearPos = Game.LocalPlayer.Character.LastVehicle.GetOffsetPosition(new Vector3(0, -4f, 0));
                     //Rage.Native.NativeFunction.Natives.DRAW_MARKER(1, rearPos, 0, 0, 0, 0, 0, 0, collectionRadius, collectionRadius, 1f, 255, 255, 255, 100, false, false, 0, false, 0, 0, false);
-                    foreach(Vehicle v in Game.LocalPlayer.Character.GetNearbyVehicles(16))
-                    //foreach (Vehicle v in GetNearbyVehicles(Game.LocalPlayer.Character.LastVehicle.GetOffsetPosition(new Vector3(0, -4f, 0)), 5f))
+                    foreach(Vehicle v in Game.LocalPlayer.Character.GetNearbyVehicles(16).Where(v => v && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius && v != Game.LocalPlayer.Character.LastVehicle && v.IsEngineOn && v.IsOnAllWheels && !v.IsSirenOn && !v.IsTrailer && !v.IsTrain && (Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) < 90f || Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) > 200f) && !yieldingVehicles.Contains(v)))
                     {
-                        if (v && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius && v != Game.LocalPlayer.Character.LastVehicle && v.IsEngineOn && v.IsOnAllWheels && !v.IsSirenOn && !v.IsTrailer && !v.IsTrain && (Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) < 90f || Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) > 200f) && !yieldingVehicles.Contains(v))
-                        {
-                            SetVehicleAndDriverPersistence(v);
-                            yieldingVehicles.Add(v);
-                            Game.LogTrivialDebug($"{v.Model.Name} added to collection.");
+                        SetVehicleAndDriverPersistence(v);
+                        yieldingVehicles.Add(v);
+                        Game.LogTrivialDebug($"{v.Model.Name} added to collection.");
 
-                            GameFiber YieldTasksFiber = new GameFiber(() => v.PerformYieldTasks());
-                            YieldTasksFiber.Start();
-                        }
+                        GameFiber YieldTasksFiber = new GameFiber(() => v.PerformYieldTasks());
+                        YieldTasksFiber.Start();
                     }
                 }
                 GameFiber.Yield();
-            }
-
-            Vehicle[] GetNearbyVehicles(Vector3 OriginPosition, float radius)
-            {
-                return (from v in World.GetAllVehicles() where v && v.FrontPosition.DistanceTo(OriginPosition) <= radius && v != Game.LocalPlayer.Character.LastVehicle && v.IsEngineOn && v.IsOnAllWheels && !v.IsSirenOn && !v.IsTrailer && !v.IsTrain && (Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) < 90f || Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) > 200f) select v).ToArray();
             }
         }
 
