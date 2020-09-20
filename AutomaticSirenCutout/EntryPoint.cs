@@ -66,12 +66,3 @@ namespace AutomaticSirenCutout
         }
     }
 }
-
-/*
- *  if (Game.LocalPlayer.IsFreeAimingAtAnyEntity)
-    {
-        Game.LogTrivial("Entity hash: " + Game.LocalPlayer.GetFreeAimingTarget().Model.Hash.ToString());
-        Game.LogTrivial("Entity heading: " + Game.LocalPlayer.GetFreeAimingTarget().Heading.ToString());
-        Game.LogTrivial("Player heading: " + Game.LocalPlayer.Character.Heading.ToString());
-    }
-*/
