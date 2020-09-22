@@ -29,13 +29,13 @@ namespace AutomaticSirenCutout
                             GameFiber.Sleep(7000);
                             if (v && !v.HasDriver && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius)
                             {
-                                Game.LogTrivialDebug($"{v.Model.Name} is an emergency vehicle and hasn't moved in 7 seconds.  It might be a backup unit, disregard.");
+                                Game.LogTrivialDebug($"[Yield]: {v.Model.Name} is an emergency vehicle and hasn't moved in 7 seconds.  It might be a backup unit, disregard.");
                                 continue;
                             }
                         }
                         SetVehicleAndDriverPersistence(v);
                         yieldingVehicles.Add(v);
-                        Game.LogTrivialDebug($"{v.Model.Name} added to collection.");
+                        Game.LogTrivialDebug($"[Yield]: {v.Model.Name} added to collection.");
 
                         GameFiber YieldTasksFiber = new GameFiber(() => v.PerformYieldTasks());
                         YieldTasksFiber.Start();
@@ -57,7 +57,7 @@ namespace AutomaticSirenCutout
                 }
                 if (!v)
                 {
-                    Game.LogTrivialDebug($"Vehicle is null");
+                    Game.LogTrivialDebug($"[Yield]: Vehicle is null");
                     return;
                 }
             }
@@ -68,12 +68,12 @@ namespace AutomaticSirenCutout
         {
             if (!v)
             {
-                Game.LogTrivialDebug($"Vehicle is null");
+                Game.LogTrivialDebug($"[Yield]: Vehicle is null");
                 return;
             }
             if (!v.Driver)
             {
-                Game.LogTrivialDebug($"Driver is null");
+                Game.LogTrivialDebug($"[Yield]: Driver is null");
                 return;
             }
 
@@ -89,7 +89,7 @@ namespace AutomaticSirenCutout
                         v.Driver.Tasks.CruiseWithVehicle(5f, (VehicleDrivingFlags)558);
                     }
                 }
-                Game.LogTrivialDebug($"Waiting for {v.Model.Name} to leave the area.");
+                Game.LogTrivialDebug($"[Yield]: Waiting for {v.Model.Name} to leave the area.");
                 GameFiber.Sleep(100);
             }
             if (v)
@@ -126,7 +126,7 @@ namespace AutomaticSirenCutout
             {
                 v.Driver.Tasks.Clear();
             }
-            Game.LogTrivialDebug($"{v.Model.Name} removed from collection.");
+            Game.LogTrivialDebug($"[Yield]: {v.Model.Name} removed from collection.");
 
             v.Driver.Dismiss();
             v.Dismiss();
@@ -144,7 +144,7 @@ namespace AutomaticSirenCutout
             }
             yieldingVehicles.Clear();
 
-            Game.LogTrivial("[ASC Yield]: Ending from crash or reload");
+            Game.LogTrivial("[Yield]: Plugin terminated.");
         }
     }
 }
