@@ -11,7 +11,7 @@ namespace AutomaticSirenCutout
             {
                 if (Game.LocalPlayer.Character.IsAlive && Game.LocalPlayer.Character.IsInAnyVehicle(false) && Game.LocalPlayer.Character.CurrentVehicle && Game.LocalPlayer.Character.CurrentVehicle.IsSirenOn && (Game.IsKeyDown(Settings.KeyboardExitVehicle) || Game.IsControllerButtonDown(Settings.ControllerExitVehicle)))
                 {
-                    Game.LogTrivial("Player is exiting vehicle with stage 3 on, resetting stage 3.");
+                    Game.LogTrivialDebug("[Automatic Siren Cutout]: Player is exiting vehicle with stage 3 on, resetting stage 3.");
                     for (int i = 0; i < 4; i++)
                     {
                         Keyboard.KeyDown(Settings.KeyboardELSLights);
