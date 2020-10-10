@@ -36,7 +36,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\InputManager.dll</HintPath>
     </Reference>
-    <Reference Include="RagePluginHookSDK">
+    <Reference Include="LSPD First Response">
+      <HintPath>D:\Program Files\Rockstar Games\Grand Theft Auto V\plugins\LSPD First Response.dll</HintPath>
+    </Reference>
+    <Reference Include="RagePluginHookSDK, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Modding Resources\References\RagePluginHookSDK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
