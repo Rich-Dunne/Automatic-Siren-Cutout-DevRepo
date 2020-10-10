@@ -21,7 +21,7 @@ namespace AutomaticSirenCutout
         internal static void LoadSettings()
         {
             Game.LogTrivial("Loading AutomaticSirenCutout.ini settings");
-            InitializationFile ini = new InitializationFile("Plugins/AutomaticSirenCutout.ini");
+            InitializationFile ini = new InitializationFile("Plugins/LSPDFR/AutomaticSirenCutout.ini");
             ini.Create();
             KeyboardExitVehicle = ini.ReadEnum("Keybindings", "KeyboardExitVehicle", Keys.F);
             ControllerExitVehicle = ini.ReadEnum("Keybindings", "ControllerExitVehicle", ControllerButtons.Y);

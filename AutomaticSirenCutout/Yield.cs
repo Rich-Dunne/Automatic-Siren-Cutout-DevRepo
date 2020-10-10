@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Rage;
+using LSPD_First_Response.Mod.API;
 
 namespace AutomaticSirenCutout
 {
@@ -15,6 +16,7 @@ namespace AutomaticSirenCutout
             Vector3 rearPos = new Vector3();
             float collectionRadius = 7;
             AppDomain.CurrentDomain.DomainUnload += TerminationHandler;
+            Vehicle pursuitVehicle = null;
 
             while (true)
             {
@@ -24,6 +26,15 @@ namespace AutomaticSirenCutout
                     //Rage.Native.NativeFunction.Natives.DRAW_MARKER(1, rearPos, 0, 0, 0, 0, 0, 0, collectionRadius, collectionRadius, 1f, 255, 255, 255, 100, false, false, 0, false, 0, 0, false);
                     foreach(Vehicle v in Game.LocalPlayer.Character.GetNearbyVehicles(16).Where(v => v && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius && v != Game.LocalPlayer.Character.LastVehicle && v.IsEngineOn && v.IsOnAllWheels && !v.IsSirenOn && !v.IsTrailer && !v.IsTrain && (Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) < 90f || Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) > 200f) && !yieldingVehicles.Contains(v)))
                     {
+                        if(Functions.GetActivePursuit() != null)
+                        {
+                            if (v.HasDriver && v.Driver && Functions.GetPursuitPeds(Functions.GetActivePursuit()).Contains(v.Driver))
+                            {
+                                pursuitVehicle = v;
+                                Game.LogTrivialDebug($"[Yield]: Driver is in the current pursuit, ignore.");
+                                continue;
+                            }
+                        }
                         if (v.HasSiren)
                         {
                             GameFiber.Sleep(7000);
@@ -33,7 +44,10 @@ namespace AutomaticSirenCutout
                                 continue;
                             }
                         }
-                        SetVehicleAndDriverPersistence(v);
+                        if(v != pursuitVehicle)
+                        {
+                            SetVehicleAndDriverPersistence(v);
+                        }
                         yieldingVehicles.Add(v);
                         Game.LogTrivialDebug($"[Yield]: {v.Model.Name} added to collection.");
 
@@ -122,14 +136,17 @@ namespace AutomaticSirenCutout
         private static void Dismiss(this Vehicle v)
         {
             yieldingVehicles.Remove(v);
-            if (v.Driver)
-            {
-                v.Driver.Tasks.Clear();
-            }
-            Game.LogTrivialDebug($"[Yield]: {v.Model.Name} removed from collection.");
 
-            v.Driver.Dismiss();
-            v.Dismiss();
+            if (v)
+            {
+                if (v.Driver)
+                {
+                    v.Driver.Tasks.Clear();
+                    v.Driver.Dismiss();
+                }
+                Game.LogTrivialDebug($"[Yield]: {v.Model.Name} removed from collection.");
+                v.Dismiss();
+            }
         }
 
         internal static void TerminationHandler(object sender, EventArgs e)
