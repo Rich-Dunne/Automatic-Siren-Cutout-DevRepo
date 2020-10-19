@@ -103,7 +103,7 @@ namespace AutomaticSirenCutout
                         v.Driver.Tasks.CruiseWithVehicle(5f, (VehicleDrivingFlags)558);
                     }
                 }
-                Game.LogTrivialDebug($"[Yield]: Waiting for {v.Model.Name} to leave the area.");
+                //Game.LogTrivialDebug($"[Yield]: Waiting for {v.Model.Name} to leave the area.");
                 GameFiber.Sleep(100);
             }
             if (v)
