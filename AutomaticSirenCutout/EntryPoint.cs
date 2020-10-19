@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using Rage;
 using LSPD_First_Response.Mod.API;
+using System.IO;
+using System.Net;
 
 [assembly: Rage.Attributes.Plugin("Automatic Siren Cutout", Author = "Rich", Description = "Automatically turn off your siren when you exit an emergency vehicle, as well as other quality of life features.", PrefersSingleInstance = true)]
 
@@ -15,9 +17,16 @@ namespace AutomaticSirenCutout
 
             if (Settings.EnableASC)
             {
-                Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is enabled.");
-                GameFiber ASCFiber = new GameFiber(() => AutomaticSirenCutout.ASC());
-                ASCFiber.Start();
+                if (InputManagerChecker())
+                {
+                    Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is enabled.");
+                    GameFiber ASCFiber = new GameFiber(() => AutomaticSirenCutout.ASC());
+                    ASCFiber.Start();
+                }
+                else
+                {
+                    Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is disabled due to an error.");
+                }
             }
             else
             {
@@ -67,6 +76,19 @@ namespace AutomaticSirenCutout
         {
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             Game.LogTrivial($"[AutomaticSirenCutout]: Automatic Siren Cutout V{version} is ready.");
+        }
+
+        private static bool InputManagerChecker()
+        {
+            var directory = Directory.GetCurrentDirectory();
+            var exists = File.Exists(directory + @"\InputManager.dll");
+            if (!exists)
+            {
+                Game.LogTrivial($"[AutomaticSirenCutout]: InputManager was not found in the user's GTA V directory.");
+                Game.DisplayNotification($"~o~Automatic Siren Cutout ~r~[Error]\n~w~InputManager.dll was not found in your GTA V directory.  Please install InputManager.dll and try again.");
+                return false;
+            }
+            return true;
         }
     }
 }
