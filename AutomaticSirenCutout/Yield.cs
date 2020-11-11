@@ -24,128 +24,137 @@ namespace AutomaticSirenCutout
                 {
                     rearPos = Game.LocalPlayer.Character.LastVehicle.GetOffsetPosition(new Vector3(0, -4f, 0));
                     //Rage.Native.NativeFunction.Natives.DRAW_MARKER(1, rearPos, 0, 0, 0, 0, 0, 0, collectionRadius, collectionRadius, 1f, 255, 255, 255, 100, false, false, 0, false, 0, 0, false);
-                    foreach(Vehicle v in Game.LocalPlayer.Character.GetNearbyVehicles(16).Where(v => v && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius && v != Game.LocalPlayer.Character.LastVehicle && v.IsEngineOn && v.IsOnAllWheels && !v.IsSirenOn && !v.IsTrailer && !v.IsTrain && (Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) < 90f || Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) > 200f) && !yieldingVehicles.Contains(v)))
+                    foreach(Vehicle vehicle in Game.LocalPlayer.Character.GetNearbyVehicles(16).Where(v => v && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius && v != Game.LocalPlayer.Character.LastVehicle && v.IsEngineOn && v.IsOnAllWheels && !v.IsSirenOn && !v.IsTrailer && !v.IsTrain && (Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) < 90f || Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) > 200f) && !yieldingVehicles.Contains(v)))
                     {
-                        if(Functions.GetActivePursuit() != null)
+                        if(Functions.GetActivePursuit() != null && IsVehicleInCurrentPursuit(vehicle))
                         {
-                            if (v.HasDriver && v.Driver && Functions.GetPursuitPeds(Functions.GetActivePursuit()).Contains(v.Driver))
-                            {
-                                pursuitVehicle = v;
-                                Game.LogTrivialDebug($"[Yield]: Driver is in the current pursuit, ignore.");
-                                continue;
-                            }
+                            continue;
                         }
-                        if (v.HasSiren)
+                        if (vehicle.HasSiren && IsVehicleBackupUnit(vehicle))
                         {
-                            GameFiber.Sleep(7000);
-                            if (v && !v.HasDriver && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius)
-                            {
-                                Game.LogTrivialDebug($"[Yield]: {v.Model.Name} is an emergency vehicle and hasn't moved in 7 seconds.  It might be a backup unit, disregard.");
-                                continue;
-                            }
+                            continue;
                         }
-                        if(v != pursuitVehicle)
+                        if(vehicle)
                         {
-                            SetVehicleAndDriverPersistence(v);
-                        }
-                        yieldingVehicles.Add(v);
-                        Game.LogTrivialDebug($"[Yield]: {v.Model.Name} added to collection.");
+                            SetVehicleAndDriverPersistence(vehicle);
+                            yieldingVehicles.Add(vehicle);
+                            Game.LogTrivialDebug($"[ASC Yield]: {vehicle.Model.Name} added to collection.");
 
-                        GameFiber YieldTasksFiber = new GameFiber(() => v.PerformYieldTasks());
-                        YieldTasksFiber.Start();
+                            GameFiber YieldTasksFiber = new GameFiber(() => PerformYieldTasks(vehicle));
+                            YieldTasksFiber.Start();
+                        }
                     }
                 }
                 GameFiber.Yield();
             }
-        }
 
-        private static void SetVehicleAndDriverPersistence(Vehicle v)
-        {
-            v.IsPersistent = true;
-            if (!v.HasDriver)
+            bool IsVehicleInCurrentPursuit(Vehicle vehicle)
             {
-                v.CreateRandomDriver();
-                while (v && !v.HasDriver)
+                if (vehicle.HasDriver && vehicle.Driver && Functions.GetPursuitPeds(Functions.GetActivePursuit()).Contains(vehicle.Driver))
                 {
-                    GameFiber.Yield();
+                    pursuitVehicle = vehicle;
+                    Game.LogTrivialDebug($"[ASC Yield]: Vehicle is in the current pursuit, ignore.");
+                    return true;
                 }
-                if (!v)
+                return false;
+            }
+
+            bool IsVehicleBackupUnit(Vehicle vehicle)
+            {
+                Rage.Native.NativeFunction.Natives.x260BE8F09E326A20(vehicle, collectionRadius / 2, 5, true);
+                //v.Driver.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
+                GameFiber.Sleep(5000);
+                if (vehicle && !vehicle.HasDriver && vehicle.FrontPosition.DistanceTo(rearPos) <= collectionRadius)
                 {
-                    Game.LogTrivialDebug($"[Yield]: Vehicle is null");
-                    return;
+                    Game.LogTrivialDebug($"[ASC Yield]: {vehicle.Model.Name} is an emergency vehicle and hasn't moved in 7 seconds.  It might be a backup unit, disregard.");
+                    return true;
                 }
-            }
-            v.Driver.IsPersistent = true;
-        }
-
-        private static void PerformYieldTasks(this Vehicle v)
-        {
-            if (!v)
-            {
-                Game.LogTrivialDebug($"[Yield]: Vehicle is null");
-                return;
-            }
-            if (!v.Driver)
-            {
-                Game.LogTrivialDebug($"[Yield]: Driver is null");
-                return;
+                //Rage.Native.NativeFunction.Natives.x260BE8F09E326A20(v, 0f, 1, true);
+                //vehicle.Driver.Tasks.Clear();
+                return false;
             }
 
-            SetCustomSteeringAngle(v);
-
-            while (v && v.Driver && Game.LocalPlayer.Character.LastVehicle && v.FrontPosition.DistanceTo2D(Game.LocalPlayer.Character.LastVehicle.GetOffsetPosition(new Vector3(0, -4f, 0))) < 7f)
+            void SetVehicleAndDriverPersistence(Vehicle vehicle)
             {
-                if (v && v.Driver && v.Speed < 1f)
+                vehicle.IsPersistent = true;
+                if (!vehicle.HasDriver)
                 {
-                    v.Driver.Tasks.PerformDrivingManeuver(v, VehicleManeuver.GoForwardWithCustomSteeringAngle, 1).WaitForCompletion();
-                    if (v && v.Driver)
+                    vehicle.CreateRandomDriver();
+                    while (vehicle && !vehicle.HasDriver)
                     {
-                        v.Driver.Tasks.CruiseWithVehicle(5f, (VehicleDrivingFlags)558);
+                        GameFiber.Yield();
+                    }
+                    if (!vehicle)
+                    {
+                        Game.LogTrivialDebug($"[ASC Yield]: Vehicle is null");
+                        return;
                     }
                 }
-                //Game.LogTrivialDebug($"[Yield]: Waiting for {v.Model.Name} to leave the area.");
-                GameFiber.Sleep(100);
+                vehicle.Driver.IsPersistent = true;
             }
-            if (v)
+
+            void PerformYieldTasks(Vehicle vehicle)
             {
-                Dismiss(v);
-            }
-        }
-
-        private static void SetCustomSteeringAngle(Vehicle v)
-        {
-            if (v.Speed < 1f)
-            {
-                if (v.Heading < 45f)
+                if (!vehicle)
                 {
-                    v.SteeringAngle = 360f + (v.Heading - 45f);
+                    Game.LogTrivialDebug($"[ASC Yield]: Vehicle is null");
+                    return;
                 }
-                else
+                if (!vehicle.Driver)
                 {
-                    v.SteeringAngle = v.Heading - 45f;
+                    Game.LogTrivialDebug($"[ASC Yield]: Driver is null");
+                    return;
                 }
-                v.Driver.Tasks.PerformDrivingManeuver(v, VehicleManeuver.GoForwardWithCustomSteeringAngle, 2).WaitForCompletion();
 
-                if (v && v.Driver)
+                SetCustomSteeringAngle();
+
+                while (vehicle && vehicle.Driver && Game.LocalPlayer.Character.LastVehicle && vehicle.FrontPosition.DistanceTo2D(Game.LocalPlayer.Character.LastVehicle.GetOffsetPosition(new Vector3(0, -4f, 0))) < 7f)
                 {
-                    v.Driver.Tasks.CruiseWithVehicle(5f, (VehicleDrivingFlags)558);
+                    if (vehicle && vehicle.Driver && vehicle.Speed < 1f)
+                    {
+                        vehicle.Driver.Tasks.PerformDrivingManeuver(vehicle, VehicleManeuver.GoForwardWithCustomSteeringAngle, 1).WaitForCompletion();
+                        if (vehicle && vehicle.Driver)
+                        {
+                            vehicle.Driver.Tasks.CruiseWithVehicle(5f, (VehicleDrivingFlags)558);
+                        }
+                    }
+                    //Game.LogTrivialDebug($"[Yield]: Waiting for {v.Model.Name} to leave the area.");
+                    GameFiber.Sleep(100);
                 }
-            }
-        }
-
-        private static void Dismiss(this Vehicle v)
-        {
-            yieldingVehicles.Remove(v);
-
-            if (v)
-            {
-                if (v.Driver)
+                if (vehicle)
                 {
-                    v.Driver.Tasks.Clear();
-                    v.Driver.Dismiss();
+                    Dismiss();
                 }
-                Game.LogTrivialDebug($"[Yield]: {v.Model.Name} removed from collection.");
-                v.Dismiss();
+
+                void SetCustomSteeringAngle()
+                {
+                    if (vehicle.Speed < 1f)
+                    {
+                        vehicle.SteeringAngle = 45;
+                        vehicle.Driver.Tasks.PerformDrivingManeuver(vehicle, VehicleManeuver.GoForwardWithCustomSteeringAngle, 2).WaitForCompletion();
+
+                        if (vehicle && vehicle.Driver)
+                        {
+                            vehicle.Driver.Tasks.CruiseWithVehicle(5f, (VehicleDrivingFlags)558);
+                        }
+                    }
+                }
+
+                void Dismiss()
+                {
+                    yieldingVehicles.Remove(vehicle);
+
+                    if (vehicle)
+                    {
+                        if (vehicle.Driver)
+                        {
+                            vehicle.Driver.Tasks.Clear();
+                            vehicle.Driver.Dismiss();
+                        }
+                        Game.LogTrivialDebug($"[ASC Yield]: {vehicle.Model.Name} removed from collection.");
+                        vehicle.Dismiss();
+                    }
+                }
             }
         }
 
@@ -161,7 +170,7 @@ namespace AutomaticSirenCutout
             }
             yieldingVehicles.Clear();
 
-            Game.LogTrivial("[Yield]: Plugin terminated.");
+            Game.LogTrivial("[ASC Yield]: Plugin terminated.");
         }
     }
 }
