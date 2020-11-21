@@ -13,57 +13,65 @@ namespace AutomaticSirenCutout
         public override void Initialize()
         {
             Settings.LoadSettings();
-            GetAssemblyVersion();
+            Functions.OnOnDutyStateChanged += OnOnDutyStateChangedHandler;
+        }
 
-            if (Settings.EnableASC)
+        private void OnOnDutyStateChangedHandler(bool onDuty)
+        {
+            if (onDuty)
             {
-                if (InputManagerChecker())
+                GetAssemblyVersion();
+
+                if (Settings.EnableASC)
                 {
-                    Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is enabled.");
-                    GameFiber ASCFiber = new GameFiber(() => AutomaticSirenCutout.ASC());
-                    ASCFiber.Start();
+                    if (InputManagerChecker())
+                    {
+                        Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is enabled.");
+                        GameFiber ASCFiber = new GameFiber(() => AutomaticSirenCutout.ASC());
+                        ASCFiber.Start();
+                    }
+                    else
+                    {
+                        Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is disabled due to an error.");
+                    }
                 }
                 else
                 {
-                    Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is disabled due to an error.");
+                    Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is disabled.");
                 }
-            }
-            else
-            {
-                Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is disabled.");
-            }
 
-            if (Settings.EnableTrafficLightControl)
-            {
-                Game.LogTrivial("[AutomaticSirenCutout]: TrafficLightControl is enabled.");
-                GameFiber TrafficLightFiber = new GameFiber(() => TrafficLightControl.TLC());
-                TrafficLightFiber.Start();
-            }
-            else
-            {
-                Game.LogTrivial("[AutomaticSirenCutout]: TrafficLightControl is disabled.");
-            }
+                if (Settings.EnableTrafficLightControl)
+                {
+                    Game.LogTrivial("[AutomaticSirenCutout]: TrafficLightControl is enabled.");
+                    GameFiber TrafficLightFiber = new GameFiber(() => TrafficLightControl.TLC());
+                    TrafficLightFiber.Start();
+                }
+                else
+                {
+                    Game.LogTrivial("[AutomaticSirenCutout]: TrafficLightControl is disabled.");
+                }
 
-            if (Settings.EnableFriendlyHonk)
-            {
-                Game.LogTrivial("[AutomaticSirenCutout]: FriendlyHonk is enabled.");
-                GameFiber FriendlyHonkFiber = new GameFiber(() => FriendlyHonk.Honk());
-                FriendlyHonkFiber.Start();
-            }
-            else
-            {
-                Game.LogTrivial("[AutomaticSirenCutout]: FriendlyHonk is disabled.");
-            }
+                if (Settings.EnableFriendlyHonk)
+                {
+                    Game.LogTrivial("[AutomaticSirenCutout]: FriendlyHonk is enabled.");
+                    GameFiber FriendlyHonkFiber = new GameFiber(() => FriendlyHonk.Honk());
+                    FriendlyHonkFiber.Start();
+                }
+                else
+                {
+                    Game.LogTrivial("[AutomaticSirenCutout]: FriendlyHonk is disabled.");
+                }
 
-            if(Settings.EnableYielding)
-            {
-                Game.LogTrivial("[AutomaticSirenCutout]: Yielding is enabled.");
-                GameFiber YieldFiber = new GameFiber(() => Yield.YieldMain());
-                YieldFiber.Start();
-            }
-            else
-            {
-                Game.LogTrivial("[AutomaticSirenCutout]: Yielding is disabled.");
+                if (Settings.EnableYielding)
+                {
+                    Game.LogTrivial("[AutomaticSirenCutout]: Yielding is enabled.");
+                    GameFiber YieldFiber = new GameFiber(() => Yield.YieldMain());
+                    YieldFiber.Start();
+                }
+                else
+                {
+                    Game.LogTrivial("[AutomaticSirenCutout]: Yielding is disabled.");
+                }
             }
         }
 
