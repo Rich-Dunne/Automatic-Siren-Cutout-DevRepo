@@ -63,7 +63,7 @@ namespace AutomaticSirenCutout
             {
                 Rage.Native.NativeFunction.Natives.x260BE8F09E326A20(vehicle, collectionRadius / 2, 5, true);
                 //v.Driver.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
-                GameFiber.Sleep(5000);
+                GameFiber.Sleep(7000);
                 if (vehicle && !vehicle.HasDriver && vehicle.FrontPosition.DistanceTo(rearPos) <= collectionRadius)
                 {
                     Game.LogTrivialDebug($"[ASC Yield]: {vehicle.Model.Name} is an emergency vehicle and hasn't moved in 7 seconds.  It might be a backup unit, disregard.");
