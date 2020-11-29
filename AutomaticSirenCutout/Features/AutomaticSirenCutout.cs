@@ -1,9 +1,9 @@
 ﻿using InputManager;
 using Rage;
 
-namespace AutomaticSirenCutout
+namespace AutomaticSirenCutout.Features
 {
-    class AutomaticSirenCutout
+    internal static class AutomaticSirenCutout
     {
         internal static void ASC()
         {

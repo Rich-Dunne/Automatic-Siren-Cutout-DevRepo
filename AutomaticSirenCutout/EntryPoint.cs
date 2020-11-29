@@ -2,7 +2,7 @@
 using Rage;
 using LSPD_First_Response.Mod.API;
 using System.IO;
-using System.Net;
+using AutomaticSirenCutout.Features;
 
 [assembly: Rage.Attributes.Plugin("Automatic Siren Cutout", Author = "Rich", Description = "Automatically turn off your siren when you exit an emergency vehicle, as well as other quality of life features.", PrefersSingleInstance = true)]
 
@@ -27,7 +27,7 @@ namespace AutomaticSirenCutout
                     if (InputManagerChecker())
                     {
                         Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is enabled.");
-                        GameFiber ASCFiber = new GameFiber(() => AutomaticSirenCutout.ASC());
+                        GameFiber ASCFiber = new GameFiber(() => Features.AutomaticSirenCutout.ASC());
                         ASCFiber.Start();
                     }
                     else
