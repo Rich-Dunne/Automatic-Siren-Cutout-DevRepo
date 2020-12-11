@@ -9,7 +9,7 @@ namespace AutomaticSirenCutout.Features
 {
     internal static class Yield
     {
-        internal static List<Vehicle> yieldingVehicles = new List<Vehicle>();
+        private static List<Vehicle> _yieldingVehicles = new List<Vehicle>();
 
         internal static void YieldMain()
         {
@@ -18,26 +18,31 @@ namespace AutomaticSirenCutout.Features
             AppDomain.CurrentDomain.DomainUnload += TerminationHandler;
             Vehicle pursuitVehicle = null;
 
+            GameFiber.StartNew(() =>
+            {
+                CleanupCollectedVehicles();
+            });
+
             while (true)
             {
                 if (Game.LocalPlayer.Character.Position.DistanceTo(garage) > 5f && Game.LocalPlayer.Character.LastVehicle && Game.LocalPlayer.Character.LastVehicle.IsSirenOn && Game.LocalPlayer.Character.LastVehicle.Speed == 0f)
                 {
                     var rearPos = Game.LocalPlayer.Character.LastVehicle.GetOffsetPosition(new Vector3(0, -4f, 0));
                     //Rage.Native.NativeFunction.Natives.DRAW_MARKER(1, rearPos, 0, 0, 0, 0, 0, 0, collectionRadius, collectionRadius, 1f, 255, 255, 255, 100, false, false, 0, false, 0, 0, false);
-                    foreach(Vehicle vehicle in Game.LocalPlayer.Character.GetNearbyVehicles(16).Where(v => v && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius && v != Game.LocalPlayer.Character.LastVehicle && v.IsEngineOn && v.IsOnAllWheels && !v.IsSirenOn && !v.IsTrailer && !v.IsTrain && (Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) < 90f || Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) > 200f) && !yieldingVehicles.Contains(v)))
+                    foreach(Vehicle vehicle in Game.LocalPlayer.Character.GetNearbyVehicles(16).Where(v => v && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius && v != Game.LocalPlayer.Character.LastVehicle && v.IsEngineOn && v.IsOnAllWheels && !v.IsSirenOn && !v.IsTrailer && !v.IsTrain && (Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) < 90f || Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) > 200f) && !_yieldingVehicles.Contains(v)))
                     {
                         if(Functions.GetActivePursuit() != null && IsVehicleInCurrentPursuit(vehicle))
                         {
                             continue;
                         }
-                        if (vehicle.HasSiren && !vehicle.Driver.IsAmbient())
+                        if (vehicle.HasSiren && vehicle.Driver && !vehicle.Driver.IsAmbient())
                         {
                             continue;
                         }
                         if(vehicle)
                         {
                             SetVehicleAndDriverPersistence(vehicle);
-                            yieldingVehicles.Add(vehicle);
+                            _yieldingVehicles.Add(vehicle);
                             Game.LogTrivialDebug($"[ASC Yield]: {vehicle.Model.Name} added to collection.");
 
                             GameFiber YieldTasksFiber = new GameFiber(() => PerformYieldTasks(vehicle));
@@ -107,30 +112,37 @@ namespace AutomaticSirenCutout.Features
                 }
                 if (vehicle)
                 {
-                    Dismiss();
+                    Dismiss(vehicle);
                 }
+            }
 
-                void Dismiss()
+            void Dismiss(Vehicle vehicle)
+            {
+                if (vehicle)
                 {
-                    yieldingVehicles.Remove(vehicle);
-
-                    if (vehicle)
+                    if (vehicle.Driver)
                     {
-                        if (vehicle.Driver)
-                        {
-                            vehicle.Driver.Tasks.Clear();
-                            vehicle.Driver.Dismiss();
-                        }
-                        Game.LogTrivialDebug($"[ASC Yield]: {vehicle.Model.Name} removed from collection.");
-                        vehicle.Dismiss();
+                        vehicle.Driver.Tasks.Clear();
+                        vehicle.Driver.Dismiss();
                     }
+                    Game.LogTrivialDebug($"[ASC Yield]: {vehicle.Model.Name} removed from collection.");
+                    vehicle.Dismiss();
                 }
             }
         }
 
-        internal static void TerminationHandler(object sender, EventArgs e)
+        private static void CleanupCollectedVehicles()
         {
-            foreach(Vehicle v in yieldingVehicles.Where(v => v))
+            while (true)
+            {
+                _yieldingVehicles.RemoveAll(x => !x);
+                GameFiber.Sleep(5000);
+            }
+        }
+
+        private static void TerminationHandler(object sender, EventArgs e)
+        {
+            foreach(Vehicle v in _yieldingVehicles.Where(v => v))
             {
                 if (v.Driver)
                 {
@@ -138,7 +150,7 @@ namespace AutomaticSirenCutout.Features
                 }
                 v.Dismiss();
             }
-            yieldingVehicles.Clear();
+            _yieldingVehicles.Clear();
 
             Game.LogTrivial("[AutomaticSirenCutout]: Plugin terminated.");
         }
