@@ -46,25 +46,25 @@ namespace AutomaticSirenCutout.Utils
             // If ped relationship group does not contain "cop" then this extension doesn't apply
             if (pedType == PedType.Cop && !ped.RelationshipGroup.Name.ToLower().Contains("cop"))
             {
-                Game.LogTrivial($"Ped does not belong to a cop relationship group.");
+                //Game.LogTrivial($"[Ambient Ped Check]: Ped does not belong to a cop relationship group.");
                 return false;
             }
 
             // Cop is in a vehicle
             if (taskInVehicleBasic)
             {
-                Game.LogTrivial($"Ped is in a vehicle.");
+                //Game.LogTrivial($"[Ambient Ped Check]: Ped is in a vehicle.");
                 // Ped has a controlled driving task
                 if (taskControlVehicle)
                 {
-                    Game.LogTrivial($"Ped has a controlled driving task. (non-ambient)");
+                    //Game.LogTrivial($"[Ambient Ped Check]: Ped has a controlled driving task. (non-ambient)");
                     return false;
                 }
 
                 // Ped has a wander driving task
                 if (taskCarDriveWander)
                 {
-                    Game.LogTrivial($"Ped has a wander driving task. (ambient)");
+                    //Game.LogTrivial($"[Ambient Ped Check]: Ped has a wander driving task. (ambient)");
                     return true;
                 }
 
@@ -72,7 +72,7 @@ namespace AutomaticSirenCutout.Utils
                 var driverHasWanderTask = Rage.Native.NativeFunction.Natives.GET_IS_TASK_ACTIVE<bool>(ped.CurrentVehicle.Driver, 151);
                 if (driverHasWanderTask)
                 {
-                    Game.LogTrivial($"Ped is a passenger.  Vehicle's driver has a wander driving task. (ambient)");
+                    //Game.LogTrivial($"[Ambient Ped Check]: Ped is a passenger.  Vehicle's driver has a wander driving task. (ambient)");
                     return true;
                 }
             }
@@ -80,22 +80,22 @@ namespace AutomaticSirenCutout.Utils
             if (ped.IsOnFoot)
             {
                 // UB unit on-foot, waiting for interaction
-                if (pedType == PedType.Cop && ped.RelationshipGroup.Name == "UBCOP" && taskScriptedAnimation)
+                if (ped.RelationshipGroup.Name == "UBCOP" && taskScriptedAnimation)
                 {
-                    Game.LogTrivial($"Cop is UB unit waiting for interaction. (non-ambient)");
+                    //Game.LogTrivial($"[Ambient Ped Check]: Cop is UB unit waiting for interaction. (non-ambient)");
                     return false;
                 }
 
                 // Cop ped walking around or standing still
                 if ((taskComplexControlMovement && taskWanderingScenario) || (taskAmbientClips && taskUseScenario))
                 {
-                    Game.LogTrivial($"Ped is wandering around or standing still. (ambient)");
+                    //Game.LogTrivial($"[Ambient Ped Check]: Ped is wandering around or standing still. (ambient)");
                     return true;
                 }
             }
 
             // If nothing else returns true before now, then the ped is probably being controlled and doing something else
-            Game.LogTrivial($"Nothing else has returned true by this point. (non-ambient)");
+            //Game.LogTrivial($"[Ambient Ped Check]: Nothing else has returned true by this point. (non-ambient)");
             return false;
         }
     }
