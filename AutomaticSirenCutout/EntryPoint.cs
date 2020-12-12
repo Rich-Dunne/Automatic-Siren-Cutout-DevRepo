@@ -8,8 +8,10 @@ using AutomaticSirenCutout.Features;
 
 namespace AutomaticSirenCutout
 {
-    internal class Main : Plugin
+    [Obfuscation(Exclude = false, Feature = "-rename", ApplyToMembers = false)]
+    public class Main : Plugin
     {
+        [Obfuscation(Exclude = false, Feature = "-rename")]
         public override void Initialize()
         {
             Settings.LoadSettings();
