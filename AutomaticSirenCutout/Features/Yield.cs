@@ -17,6 +17,7 @@ namespace AutomaticSirenCutout.Features
             float collectionRadius = 7;
             AppDomain.CurrentDomain.DomainUnload += TerminationHandler;
             Vehicle pursuitVehicle = null;
+            List<Vehicle> ignoredVehicles = new List<Vehicle>();
 
             GameFiber.StartNew(() =>
             {
@@ -29,14 +30,16 @@ namespace AutomaticSirenCutout.Features
                 {
                     var rearPos = Game.LocalPlayer.Character.LastVehicle.GetOffsetPosition(new Vector3(0, -4f, 0));
                     //Rage.Native.NativeFunction.Natives.DRAW_MARKER(1, rearPos, 0, 0, 0, 0, 0, 0, collectionRadius, collectionRadius, 1f, 255, 255, 255, 100, false, false, 0, false, 0, 0, false);
-                    foreach(Vehicle vehicle in Game.LocalPlayer.Character.GetNearbyVehicles(16).Where(v => v && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius && v != Game.LocalPlayer.Character.LastVehicle && v.IsEngineOn && v.IsOnAllWheels && !v.IsSirenOn && !v.IsTrailer && !v.IsTrain && (Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) < 90f || Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) > 200f) && !_yieldingVehicles.Contains(v)))
+                    foreach(Vehicle vehicle in Game.LocalPlayer.Character.GetNearbyVehicles(16).Where(v => v && v.FrontPosition.DistanceTo(rearPos) <= collectionRadius && v != Game.LocalPlayer.Character.LastVehicle && v.IsEngineOn && v.IsOnAllWheels && !v.IsSirenOn && !v.IsTrailer && !v.IsTrain && (Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) < 90f || Math.Abs(Game.LocalPlayer.Character.LastVehicle.Heading - v.Heading) > 200f) && !_yieldingVehicles.Contains(v) && !ignoredVehicles.Contains(v)))
                     {
                         if(Functions.GetActivePursuit() != null && IsVehicleInCurrentPursuit(vehicle))
                         {
+                            ignoredVehicles.Add(vehicle);
                             continue;
                         }
                         if (vehicle.HasSiren && vehicle.Driver && !vehicle.Driver.IsAmbient())
                         {
+                            ignoredVehicles.Add(vehicle);
                             continue;
                         }
                         if(vehicle)
