@@ -69,11 +69,14 @@ namespace AutomaticSirenCutout.Utils
                 }
 
                 // If the ped is in a vehicle but doesn't have a driving task, then it's a passenger.  Check if the vehicle's driver has a driving wander task
-                var driverHasWanderTask = Rage.Native.NativeFunction.Natives.GET_IS_TASK_ACTIVE<bool>(ped.CurrentVehicle.Driver, 151);
-                if (driverHasWanderTask)
+                if (ped.CurrentVehicle && ped.CurrentVehicle.Driver)
                 {
-                    //Game.LogTrivial($"[Ambient Ped Check]: Ped is a passenger.  Vehicle's driver has a wander driving task. (ambient)");
-                    return true;
+                    var driverHasWanderTask = Rage.Native.NativeFunction.Natives.GET_IS_TASK_ACTIVE<bool>(ped.CurrentVehicle.Driver, 151);
+                    if (driverHasWanderTask)
+                    {
+                        //Game.LogTrivial($"[Ambient Ped Check]: Ped is a passenger.  Vehicle's driver has a wander driving task. (ambient)");
+                        return true;
+                    }
                 }
             }
 
