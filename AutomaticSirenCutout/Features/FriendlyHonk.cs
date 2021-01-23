@@ -5,7 +5,7 @@ namespace AutomaticSirenCutout.Features
 {
     public class FriendlyHonk
     {
-        public static void Honk()
+        public static void Main()
         {
             while (true)
             {

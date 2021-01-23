@@ -6,7 +6,7 @@ namespace AutomaticSirenCutout.Features
 {
     internal class TrafficLightControl
     {
-        internal static void TLC()
+        internal static void Main()
         {
             List<uint> trafficSignalHashes = new List<uint> { 3639322914, 862871082, 865627822, 1043035044 };
 
