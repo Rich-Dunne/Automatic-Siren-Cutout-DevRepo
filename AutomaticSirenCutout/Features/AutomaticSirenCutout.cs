@@ -5,7 +5,7 @@ namespace AutomaticSirenCutout.Features
 {
     internal static class AutomaticSirenCutout
     {
-        internal static void ASC()
+        internal static void Main()
         {
             while (true)
             {
