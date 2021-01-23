@@ -18,5 +18,8 @@
 </protection >
 </rule>
 </module>
+<probePath>..\..\bin\Debug</probePath>
+<probePath>D:\Program Files\Rockstar Games\Grand Theft Auto V\plugins</probePath>
+<probePath>C:\Users\Rich\Desktop\Mod Stuff\Mod Development\Modding Resources\References</probePath>
 <probePath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8</probePath>
 </project>
