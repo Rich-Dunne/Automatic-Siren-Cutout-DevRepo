@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace AutomaticSirenCutout.Features
 {
-    internal class FriendlyHonk
+    public class FriendlyHonk
     {
-        internal static void Honk()
+        public static void Main()
         {
             while (true)
             {
