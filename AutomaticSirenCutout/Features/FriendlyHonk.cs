@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace AutomaticSirenCutout.Features
 {
-    public class FriendlyHonk
+    internal class FriendlyHonk
     {
         public static void Main()
         {
