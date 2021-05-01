@@ -48,7 +48,7 @@ namespace AutomaticSirenCutout.Features
 
         private static bool VehicleShouldBeIgnored(Vehicle vehicle)
         {
-            if (Functions.GetCurrentPullover() != null && Functions.GetPulloverSuspect(Functions.GetCurrentPullover()).CurrentVehicle == vehicle)
+            if (Functions.GetCurrentPullover() != null && Functions.GetPulloverSuspect(Functions.GetCurrentPullover()) && Functions.GetPulloverSuspect(Functions.GetCurrentPullover()).CurrentVehicle == vehicle)
             {
                 return true;
             }
@@ -56,7 +56,7 @@ namespace AutomaticSirenCutout.Features
             {
                 return true;
             }
-            if (vehicle.HasSiren && vehicle.Driver && !vehicle.Driver.IsAmbient())
+            if (vehicle.Driver && !vehicle.Driver.IsAmbient())
             {
                 return true;
             }
