@@ -10,12 +10,6 @@
 <protection id="anti debug" />
 <protection id="ref proxy" />
 <protection id="resources" />
-<protection id = "rename" >
-<argument name = "mode" value = "decodable" />
-<argument name = "renPublic" value = "false" />
-<argument name = "renEnum" value = "false" />
-<argument name = "renameArgs" value = "false" />
-</protection >
 </rule>
 </module>
 <probePath>..\..\bin\Debug</probePath>

@@ -11,7 +11,7 @@ namespace AutomaticSirenCutout.Features
     {
         private static List<Vehicle> YieldingVehicles = new List<Vehicle>();
 
-        internal static void YieldMain()
+        internal static void Main()
         {
             Vector3 garage = new Vector3(396.42f, -970.0003f, -99.36382f);
             float collectionRadius = 7;
