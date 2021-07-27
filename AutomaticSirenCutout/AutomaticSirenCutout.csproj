@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Features\LeaveEngineRunning.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Features\AutomaticSirenCutout.cs" />
     <Compile Include="EntryPoint.cs" />

@@ -74,11 +74,21 @@ namespace AutomaticSirenCutout
             if (Settings.EnableYielding)
             {
                 Game.LogTrivial("[AutomaticSirenCutout]: Yielding is enabled.");
-                GameFiber.StartNew(() => Yield.YieldMain(), "Yield Fiber");
+                GameFiber.StartNew(() => Yield.Main(), "Yield Fiber");
             }
             else
             {
                 Game.LogTrivial("[AutomaticSirenCutout]: Yielding is disabled.");
+            }
+
+            if(Settings.EnableLeaveEngineRunning)
+            {
+                Game.LogTrivial("[AutomaticSirenCutout]: LeaveEngineRunning is enabled.");
+                GameFiber.StartNew(() => LeaveEngineRunning.Main(), "LeaveEngineRunning Fiber");
+            }
+            else
+            {
+                Game.LogTrivial("[AutomaticSirenCutout]: LeaveEngineRunning is disabled.");
             }
         }
 
