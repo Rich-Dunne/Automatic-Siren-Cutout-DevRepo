@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="..\packages\ILRepack.2.0.35\build\ILRepack.props" Condition="Exists('..\packages\ILRepack.2.0.35\build\ILRepack.props')" />
+  <Import Project="..\packages\ILRepack.FullAuto.1.6.0\build\ILRepack.FullAuto.props" Condition="Exists('..\packages\ILRepack.FullAuto.1.6.0\build\ILRepack.FullAuto.props')" />
+  <PropertyGroup>
+    <ILRepackTargetConfigurations>Debug;Release</ILRepackTargetConfigurations>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -13,6 +17,8 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,16 +37,21 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ILRepackTargetConfigurations>Debug;Release</ILRepackTargetConfigurations>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="InputManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\InputManager.dll</HintPath>
+      <HintPath>..\packages\InputManager.1.0.0\lib\InputManager.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="LSPD First Response">
-      <HintPath>D:\Program Files\Rockstar Games\Grand Theft Auto V\plugins\LSPD First Response.dll</HintPath>
+      <HintPath>G:\Rockstar Games\Grand Theft Auto V\plugins\LSPD First Response.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="RagePluginHook">
-      <HintPath>..\..\Modding Resources\References\RagePluginHook.dll</HintPath>
+    <Reference Include="RagePluginHook, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\RagePluginHook.1.109.1\lib\net472\RagePluginHook.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -54,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Features\LeaveEngineRunning.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Features\AutomaticSirenCutout.cs" />
     <Compile Include="EntryPoint.cs" />
@@ -63,5 +75,20 @@
     <Compile Include="Features\TrafficLightControl.cs" />
     <Compile Include="Features\Yield.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterCompile">
+    <Exec Command="if &quot;$(ConfigurationName)&quot; == &quot;Release&quot; (&quot;$(ProjectDir)_ConfuserEx\Confuser.CLI.exe&quot; &quot;$(ProjectDir)_ConfuserEx\c.crproj&quot;)&#xD;&#xA;" />
+  </Target>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\ILRepack.FullAuto.1.6.0\build\ILRepack.FullAuto.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.FullAuto.1.6.0\build\ILRepack.FullAuto.props'))" />
+    <Error Condition="!Exists('..\packages\ILRepack.FullAuto.1.6.0\build\ILRepack.FullAuto.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.FullAuto.1.6.0\build\ILRepack.FullAuto.targets'))" />
+    <Error Condition="!Exists('..\packages\ILRepack.2.0.35\build\ILRepack.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.2.0.35\build\ILRepack.props'))" />
+  </Target>
+  <Import Project="..\packages\ILRepack.FullAuto.1.6.0\build\ILRepack.FullAuto.targets" Condition="Exists('..\packages\ILRepack.FullAuto.1.6.0\build\ILRepack.FullAuto.targets')" />
 </Project>

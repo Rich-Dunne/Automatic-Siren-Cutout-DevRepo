@@ -12,7 +12,7 @@ namespace AutomaticSirenCutout
     {
         public override void Initialize()
         {
-            Settings.LoadSettings();
+            Settings.Prepare();
             Functions.OnOnDutyStateChanged += OnOnDutyStateChangedHandler;
         }
 
@@ -20,8 +20,8 @@ namespace AutomaticSirenCutout
         {
             if (onDuty)
             {
+                LoadFeatures();
                 GetAssemblyVersion();
-                LoadFeatures();        
             }
         }
 
@@ -34,15 +34,8 @@ namespace AutomaticSirenCutout
         {
             if (Settings.EnableASC)
             {
-                if (InputManagerChecker())
-                {
-                    Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is enabled.");
-                    GameFiber.StartNew(() => Features.AutomaticSirenCutout.Main(), "AutomaticSirenCutout Fiber");
-                }
-                else
-                {
-                    Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is disabled due to an error.");
-                }
+                Game.LogTrivial("[AutomaticSirenCutout]: AutomaticSirenCutout is enabled.");
+                GameFiber.StartNew(() => Features.AutomaticSirenCutout.Main(), "AutomaticSirenCutout Fiber");
             }
             else
             {
@@ -84,19 +77,6 @@ namespace AutomaticSirenCutout
         {
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             Game.LogTrivial($"[AutomaticSirenCutout]: Automatic Siren Cutout V{version} is ready.");
-        }
-
-        private static bool InputManagerChecker()
-        {
-            var directory = Directory.GetCurrentDirectory();
-            var exists = File.Exists(directory + @"\InputManager.dll");
-            if (!exists)
-            {
-                Game.LogTrivial($"[AutomaticSirenCutout]: InputManager was not found in the user's GTA V directory.");
-                Game.DisplayNotification($"~o~Automatic Siren Cutout ~r~[Error]\n~w~InputManager.dll was not found in your GTA V directory.  Please install InputManager.dll and try again.");
-                return false;
-            }
-            return true;
         }
     }
 }
